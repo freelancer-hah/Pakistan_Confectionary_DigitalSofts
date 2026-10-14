@@ -425,9 +425,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
+    flexGrow: 1,
+    justifyContent: 'center',
     padding: 20,
-    paddingTop: 36,
-    paddingBottom: 40,
+    paddingVertical: 30,
   },
   brandHeader: {
     alignItems: 'center',
