@@ -1352,33 +1352,57 @@ export default function StorefrontPage() {
       )}
 
       {/* RICH MODERN FOOTER */}
-      <footer className="bg-slate-900 text-slate-300 pt-14 pb-8 border-t border-slate-800 mt-16">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 pb-12 border-b border-slate-800">
-            {/* Col 1: About */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center font-black text-lg">
+      <footer className="relative bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-slate-300 pt-16 pb-10 border-t border-slate-800/80 mt-20 overflow-hidden">
+        {/* Subtle glowing ambient lights in background */}
+        <div className="pointer-events-none absolute -top-24 left-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl opacity-60" />
+        <div className="pointer-events-none absolute -top-20 right-1/4 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl opacity-40" />
+
+        {/* Top Gold Shimmer Accent Line */}
+        <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent shadow-[0_0_12px_rgba(251,191,36,0.5)]" />
+
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10 pb-12 border-b border-slate-800/80">
+            {/* Col 1: About & Trust */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 text-slate-950 flex items-center justify-center font-black text-xl shadow-lg shadow-amber-500/25 ring-2 ring-amber-300/30 flex-shrink-0">
                   🍬
                 </div>
-                <span className="font-black text-white text-base tracking-tight">
-                  PAKISTAN <span className="text-amber-400">CONFECTIONARY</span>
-                </span>
+                <div>
+                  <span className="font-black text-white text-base tracking-tight block leading-tight">
+                    PAKISTAN <span className="text-amber-400">CONFECTIONARY</span>
+                  </span>
+                  <span className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+                    Wholesale & Retail Network
+                  </span>
+                </div>
               </div>
-              <p className="text-xs text-slate-400 font-urdu leading-relaxed">
+
+              <p className="text-xs text-slate-300/90 font-urdu" style={{ lineHeight: '2.2' }}>
                 پاکستان بھر کے دکانداروں، ہول سیلرز اور ریٹیل صارفین کے لیے اعلیٰ معیار کی ٹافیاں، چاکلیٹ اور کنفیکشنری سپلائی کا سب سے بااعتماد نیٹ ورک۔
               </p>
-              <div className="flex items-center gap-2 text-[11px] text-amber-400 font-bold">
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>100% Halal Certified Ingredients</span>
+
+              <div className="space-y-2 pt-1">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-950/60 border border-emerald-500/30 text-emerald-300 text-[11px] font-bold shadow-xs">
+                  <ShieldCheck className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                  <span>100% Halal Certified Ingredients</span>
+                </div>
+                <div className="flex items-center gap-2 text-[11px] text-amber-400/90 font-medium">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+                  <span>Direct Factory Wholesale Bulk Rates</span>
+                </div>
               </div>
             </div>
 
-            {/* Col 2: Fast Portals */}
-            <div className="space-y-3">
-              <h4 className="text-xs font-black text-white uppercase tracking-wider">
-                Store Portals / مینو
-              </h4>
+            {/* Col 2: Store Portals (Navigation) */}
+            <div className="space-y-3.5">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-amber-400 ring-4 ring-amber-400/20" />
+                <h4 className="text-xs font-black text-white uppercase tracking-wider">
+                  Store Portals <span className="font-urdu font-normal text-slate-400 text-[11px] ml-1">/ مینو و پورٹلز</span>
+                </h4>
+              </div>
+
               <ul className="space-y-2 text-xs">
                 <li>
                   <button
@@ -1386,87 +1410,211 @@ export default function StorefrontPage() {
                       setActiveTab('wholesale');
                       window.scrollTo({ top: 400, behavior: 'smooth' });
                     }}
-                    className="hover:text-amber-400 transition flex items-center gap-1.5"
+                    className="w-full group flex items-center justify-between p-2.5 rounded-xl bg-slate-800/40 hover:bg-slate-800/90 border border-slate-800 hover:border-amber-500/40 text-slate-300 hover:text-white transition duration-150 cursor-pointer text-left"
                   >
-                    <span>📦 Wholesale Cartons (ہول سیل کارٹن)</span>
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center group-hover:scale-110 transition">
+                        <Package className="w-3.5 h-3.5" />
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold">Wholesale Cartons</div>
+                        <div className="text-[10px] font-urdu text-slate-400">ہول سیل کارٹن (بلک ریٹس)</div>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-amber-400 group-hover:translate-x-0.5 transition" />
                   </button>
                 </li>
+
                 <li>
                   <button
                     onClick={() => {
                       setActiveTab('retail');
                       window.scrollTo({ top: 400, behavior: 'smooth' });
                     }}
-                    className="hover:text-amber-400 transition flex items-center gap-1.5"
+                    className="w-full group flex items-center justify-between p-2.5 rounded-xl bg-slate-800/40 hover:bg-slate-800/90 border border-slate-800 hover:border-amber-500/40 text-slate-300 hover:text-white transition duration-150 cursor-pointer text-left"
                   >
-                    <span>🛍️ Retail Packets (ریٹیل پیکٹس)</span>
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center group-hover:scale-110 transition">
+                        <ShoppingBag className="w-3.5 h-3.5" />
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold">Retail Packets</div>
+                        <div className="text-[10px] font-urdu text-slate-400">ریٹیل پیکٹس (چھوٹی پیکنگ)</div>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-amber-400 group-hover:translate-x-0.5 transition" />
                   </button>
                 </li>
+
                 <li>
                   <button
                     onClick={() => setTrackingModalOpen(true)}
-                    className="hover:text-amber-400 transition flex items-center gap-1.5"
+                    className="w-full group flex items-center justify-between p-2.5 rounded-xl bg-slate-800/40 hover:bg-slate-800/90 border border-slate-800 hover:border-emerald-500/40 text-slate-300 hover:text-white transition duration-150 cursor-pointer text-left"
                   >
-                    <span>🚚 Track Live Order (آرڈر ٹریکنگ)</span>
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center group-hover:scale-110 transition">
+                        <Truck className="w-3.5 h-3.5" />
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold">Track Live Order</div>
+                        <div className="text-[10px] font-urdu text-slate-400">آرڈر ٹریکنگ و لائیو اسٹیٹس</div>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-emerald-400 group-hover:translate-x-0.5 transition" />
                   </button>
                 </li>
+
                 <li>
                   <Link
                     href="/admin"
-                    className="text-amber-400 hover:text-amber-300 font-bold transition flex items-center gap-1.5"
+                    className="w-full group flex items-center justify-between p-2.5 rounded-xl bg-gradient-to-r from-amber-500/10 to-transparent hover:from-amber-500/20 border border-amber-500/30 text-amber-300 hover:text-amber-200 transition duration-150 cursor-pointer"
                   >
-                    <span>⚙️ Admin Management Portal</span>
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-7 h-7 rounded-lg bg-amber-400 text-slate-950 flex items-center justify-center font-bold text-xs group-hover:scale-110 transition">
+                        ⚙️
+                      </div>
+                      <div>
+                        <div className="text-xs font-black">Admin Management</div>
+                        <div className="text-[10px] font-urdu text-amber-300/80">ایڈمن لاگ ان و کنٹرول پینل</div>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-3.5 h-3.5 text-amber-400 group-hover:translate-x-0.5 transition" />
                   </Link>
                 </li>
               </ul>
             </div>
 
             {/* Col 3: Delivery Coverage */}
-            <div className="space-y-3">
-              <h4 className="text-xs font-black text-white uppercase tracking-wider">
-                Nationwide Delivery / ترسیل
-              </h4>
-              <p className="text-xs text-slate-400 font-urdu leading-relaxed">
-                کراچی، لاہور، فیصل آباد، راولپنڈی، اسلام آباد، ملتان، پشاور، کوئٹہ، حیدرآباد، گوجرانوالہ اور تمام ملحقہ اضلاع میں کیش آن ڈیلیوری ترسیل۔
-              </p>
-              <div className="p-2.5 rounded-xl bg-slate-800/80 border border-slate-700/60 text-[11px] text-slate-300">
-                💵 <strong>Cash on Delivery:</strong> ادائیگی صرف مال وصولی کے وقت
+            <div className="space-y-3.5">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-emerald-400 ring-4 ring-emerald-400/20" />
+                <h4 className="text-xs font-black text-white uppercase tracking-wider">
+                  Nationwide Delivery <span className="font-urdu font-normal text-slate-400 text-[11px] ml-1">/ ترسیل</span>
+                </h4>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-slate-800/50 border border-slate-700/60 space-y-3">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-bold text-white flex items-center gap-1.5">
+                    <Truck className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>پاکستان بھر میں ترسیل</span>
+                  </span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                    150+ اضلاع
+                  </span>
+                </div>
+
+                <div className="flex flex-wrap gap-1 text-[11px] font-urdu text-slate-300">
+                  {['کراچی', 'لاہور', 'فیصل آباد', 'راولپنڈی', 'ملتان', 'پشاور', 'کوئٹہ', 'گوجرانوالہ', 'حیدرآباد'].map((city) => (
+                    <span
+                      key={city}
+                      className="px-2 py-0.5 bg-slate-900/90 rounded-md border border-slate-700/70 text-slate-300 hover:text-white hover:border-slate-500 transition"
+                    >
+                      {city}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Cash on Delivery Feature Box */}
+                <div className="p-2.5 rounded-xl bg-gradient-to-r from-amber-500/15 to-transparent border border-amber-500/30 flex items-start gap-2.5">
+                  <div className="w-6 h-6 rounded-lg bg-amber-400 text-slate-950 flex items-center justify-center font-bold text-xs flex-shrink-0 mt-0.5 shadow-xs">
+                    💵
+                  </div>
+                  <div>
+                    <div className="text-[11px] font-black text-amber-300">
+                      Cash on Delivery (COD)
+                    </div>
+                    <div className="text-[10px] font-urdu text-slate-300 leading-snug">
+                      ادائیگی صرف پارسل وصولی کے وقت نقد کریں
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Col 4: Helpline */}
-            <div className="space-y-3">
-              <h4 className="text-xs font-black text-white uppercase tracking-wider">
-                Support & Contact / رابطہ
-              </h4>
-              <div className="space-y-2 text-xs">
+            {/* Col 4: Helpline & Contact */}
+            <div className="space-y-3.5">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse ring-4 ring-emerald-400/20" />
+                <h4 className="text-xs font-black text-white uppercase tracking-wider">
+                  Support & Contact <span className="font-urdu font-normal text-slate-400 text-[11px] ml-1">/ رابطہ</span>
+                </h4>
+              </div>
+
+              <div className="space-y-2.5">
+                {/* WhatsApp Action Card */}
                 <a
-                  href="https://wa.me/923192800479"
+                  href="https://wa.me/923192800479?text=Assalam-o-Alaikum%20Pakistan%20Confectionary%20Wholesale%20Inquiry"
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-2 text-emerald-400 hover:text-emerald-300 font-bold bg-slate-800 p-2.5 rounded-xl transition"
+                  className="group relative overflow-hidden flex items-center gap-3 p-3 rounded-2xl bg-gradient-to-r from-emerald-950/80 via-emerald-900/40 to-slate-900/80 border border-emerald-500/40 hover:border-emerald-400 transition-all duration-200 shadow-md hover:shadow-emerald-500/10 active:scale-[0.98]"
                 >
-                  <MessageCircle className="w-4 h-4" />
-                  <span>WhatsApp: +92 319 2800479</span>
+                  <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center flex-shrink-0 group-hover:scale-105 group-hover:bg-emerald-500 group-hover:text-slate-950 transition-all duration-200">
+                    <MessageCircle className="w-5 h-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
+                        WhatsApp Help
+                      </span>
+                      <span className="inline-flex items-center gap-1 text-[9px] font-bold bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded-full">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                        Online
+                      </span>
+                    </div>
+                    <div className="text-xs font-black text-white font-mono tracking-tight group-hover:text-emerald-300 transition">
+                      +92 319 2800479
+                    </div>
+                    <div className="text-[10px] font-urdu text-slate-400">واٹس ایپ پر فوری معلومات و ریٹ لسٹ</div>
+                  </div>
                 </a>
 
+                {/* Direct Call Action Card */}
                 <a
                   href="tel:+923192800479"
-                  className="flex items-center gap-2 text-slate-300 hover:text-white p-2.5 rounded-xl transition"
+                  className="group relative overflow-hidden flex items-center gap-3 p-3 rounded-2xl bg-gradient-to-r from-amber-950/80 via-amber-900/40 to-slate-900/80 border border-amber-500/40 hover:border-amber-400 transition-all duration-200 shadow-md hover:shadow-amber-500/10 active:scale-[0.98]"
                 >
-                  <Phone className="w-4 h-4 text-amber-400" />
-                  <span>Call: +92 319 2800479</span>
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-400 flex items-center justify-center flex-shrink-0 group-hover:scale-105 group-hover:bg-amber-400 group-hover:text-slate-950 transition-all duration-200">
+                    <Phone className="w-5 h-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider">
+                        Direct Call
+                      </span>
+                      <span className="text-[9px] font-bold bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded-full">
+                        Call Now
+                      </span>
+                    </div>
+                    <div className="text-xs font-black text-white font-mono tracking-tight group-hover:text-amber-300 transition">
+                      +92 319 2800479
+                    </div>
+                    <div className="text-[10px] font-urdu text-slate-400">براہ راست فون کال کریں</div>
+                  </div>
                 </a>
+
+                {/* Working Hours Badge */}
+                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900/90 border border-slate-800 text-[11px] text-slate-400">
+                  <Clock className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+                  <span className="font-urdu leading-tight">پیر تا اتوار صبح 9 سے رات 10 بجے تک دستیاب</span>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Bottom Copyright */}
-          <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
-            <p>© {currentYear} Pakistan Confectionary Wholesale & Retail. All Rights Reserved.</p>
-            <p className="font-urdu text-[11px] text-slate-400">
-              اعلیٰ معیاری کنفیکشنری مصنوعات کی تھوک و پرچون ترسیل
-            </p>
+          <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
+            <div className="flex items-center gap-2 flex-wrap text-center sm:text-left">
+              <span>© {currentYear} Pakistan Confectionary Wholesale & Retail.</span>
+              <span className="hidden sm:inline text-slate-600">•</span>
+              <span className="text-slate-500">All Rights Reserved.</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-xs" />
+              <p className="font-urdu text-xs text-slate-300" style={{ lineHeight: '2' }}>
+                اعلیٰ معیاری کنفیکشنری مصنوعات کی تھوک و پرچون ترسیل
+              </p>
+            </div>
           </div>
         </div>
       </footer>
