@@ -12,6 +12,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../../theme/colors';
 import { CustomerProfile, useCart } from '../../context/CartContext';
+import { supabase } from '../../api/supabase';
 
 interface CustomerAuthModalProps {
   visible: boolean;
@@ -30,19 +31,48 @@ export default function CustomerAuthModal({ visible, onClose, onSuccess }: Custo
   const [city, setCity] = useState(customer?.city || 'Karachi');
   const [address, setAddress] = useState(customer?.address || '');
 
-  function handleSave() {
+  async function handleSave() {
     if (!name.trim() || !phone.trim() || !address.trim() || !city.trim()) {
       Alert.alert('Incomplete Info', 'Please enter your Name, Phone Number, City, and Address / برائے مہربانی تمام تفصیلات درج فرمائیں۔');
       return;
     }
 
+    const cleanedPhone = phone.trim().replace(/[\s-]/g, '');
+    const formattedPhone = cleanedPhone.startsWith('03') 
+      ? '+92' + cleanedPhone.substring(1) 
+      : cleanedPhone.startsWith('923') 
+        ? '+' + cleanedPhone 
+        : cleanedPhone.startsWith('+923') 
+          ? cleanedPhone 
+          : '+92' + cleanedPhone;
+
     const profile: CustomerProfile = {
       name: name.trim(),
-      phone: phone.trim(),
+      phone: formattedPhone,
       email: email.trim() || undefined,
       city: city.trim(),
       address: address.trim(),
     };
+
+    // Save directly to Supabase 'customers' table
+    try {
+      await supabase.from('customers').upsert(
+        {
+          name: name.trim(),
+          phone: formattedPhone,
+          email: email.trim() || null,
+          city: city.trim(),
+          address: address.trim(),
+          pin: '1234',
+          is_verified: true,
+          verification_method: 'mobile_app_direct',
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'phone' }
+      );
+    } catch (e) {
+      console.warn('Mobile DB save note:', e);
+    }
 
     setCustomer(profile);
     onClose();

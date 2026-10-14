@@ -1,26 +1,30 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { 
   ShieldCheck, 
-  Mail, 
   Phone, 
   User, 
   MapPin, 
+  Lock, 
   CheckCircle2, 
   AlertCircle, 
-  Loader2,
-  Zap,
-  Sparkles,
-  X,
-  RotateCcw
+  Loader2, 
+  Zap, 
+  Sparkles, 
+  X, 
+  LogIn, 
+  UserPlus, 
+  Eye, 
+  EyeOff,
+  ArrowRight
 } from 'lucide-react';
 
 export interface VerifiedCustomer {
   name: string;
   phone: string;
-  email: string;
+  email?: string;
   city: string;
   address: string;
   verifiedAt: string;
@@ -35,29 +39,21 @@ interface Props {
 const POPULAR_CITIES = ['Karachi', 'Lahore', 'Faisalabad', 'Rawalpindi', 'Multan', 'Peshawar', 'Quetta', 'Gujranwala'];
 
 export default function CustomerAuthModal({ isOpen, onVerified, onClose }: Props) {
-  const [step, setStep] = useState<'info' | 'otp'>('info');
+  // Mode: 'login' | 'signup'
+  const [mode, setMode] = useState<'login' | 'signup'>('login');
 
   // Form Fields
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
   const [rawPhone, setRawPhone] = useState('');
+  const [pin, setPin] = useState('');
   const [city, setCity] = useState('Karachi');
   const [address, setAddress] = useState('');
+  const [showPin, setShowPin] = useState(false);
 
-  // OTP State
-  const [otpCode, setOtpCode] = useState('');
+  // UI State
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
-  const [resendCooldown, setResendCooldown] = useState(0);
-
-  useEffect(() => {
-    let timer: any;
-    if (resendCooldown > 0) {
-      timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
-    }
-    return () => clearTimeout(timer);
-  }, [resendCooldown]);
 
   function formatPakistaniPhone(num: string): string {
     const cleaned = num.replace(/[\s-]/g, '');
@@ -68,12 +64,17 @@ export default function CustomerAuthModal({ isOpen, onVerified, onClose }: Props
     return '+92' + cleaned;
   }
 
-  // Instant 1-Click Bypass / Direct Access
+  function isValidPakistaniPhone(num: string): boolean {
+    const cleaned = num.replace(/[\s-]/g, '');
+    const regex = /^((\+92)|(0092)|(92)|(0))?3[0-9]{9}$/;
+    return regex.test(cleaned);
+  }
+
+  // Instant 1-Click Bypass / Direct Access (For Demo & Fast Testing)
   function handleDirectBypass() {
     const bypassCustomer: VerifiedCustomer = {
       name: name.trim() || 'Valued Wholesale Client',
       phone: rawPhone.trim() ? formatPakistaniPhone(rawPhone) : '+923001234567',
-      email: email.trim() || 'customer@wholesale.com',
       city: city.trim() || 'Karachi',
       address: address.trim() || 'Main Confectionery Market, Shop # 4',
       verifiedAt: new Date().toISOString(),
@@ -83,18 +84,17 @@ export default function CustomerAuthModal({ isOpen, onVerified, onClose }: Props
     onVerified(bypassCustomer);
   }
 
-  // Step 1: Send OTP to Gmail via Supabase Auth
-  async function handleSendOtp(e?: React.FormEvent) {
-    if (e) e.preventDefault();
-    if (!name.trim() || !email.trim() || !rawPhone.trim() || !address.trim() || !city.trim()) {
-      setErrorMsg('Please enter your Name, Gmail, Phone, and Address / برائے مہربانی نام، ای میل، فون نمبر اور پتہ درج فرمائیں۔');
+  // Handle Login with Phone & PIN/Password
+  async function handleLogin(e: React.FormEvent) {
+    e.preventDefault();
+
+    if (!rawPhone.trim() || !pin.trim()) {
+      setErrorMsg('Please enter your Phone Number and PIN/Password / برائے مہربانی فون نمبر اور پن کوڈ درج فرمائیں۔');
       return;
     }
 
-    // Basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email.trim())) {
-      setErrorMsg('Please enter a valid Gmail / Email address / درست ای میل یا جی میل درج فرمائیں۔');
+    if (!isValidPakistaniPhone(rawPhone)) {
+      setErrorMsg('Please enter a valid Pakistani mobile number (e.g. 03001234567) / درست پاکستانی موبائل نمبر درج فرمائیں۔');
       return;
     }
 
@@ -102,61 +102,133 @@ export default function CustomerAuthModal({ isOpen, onVerified, onClose }: Props
     setErrorMsg(null);
     setSuccessMsg(null);
 
+    const formattedPhone = formatPakistaniPhone(rawPhone);
+
     try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email: email.trim().toLowerCase(),
-        options: {
-          shouldCreateUser: true,
-        },
-      });
+      // Find customer by phone in Supabase
+      const { data, error } = await supabase
+        .from('customers')
+        .select('*')
+        .eq('phone', formattedPhone)
+        .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
 
-      setStep('otp');
-      setResendCooldown(60);
-      setSuccessMsg(`OTP Code sent to ${email.trim()}! Check your Gmail Inbox or Spam folder.`);
+      if (!data) {
+        setErrorMsg('No wholesale account found with this phone number. Please click Sign Up / اس فون نمبر سے کوئی اکاؤنٹ نہیں ملا، برائے مہربانی نیا اکاؤنٹ بنائیں۔');
+        return;
+      }
+
+      // Verify PIN / Password
+      const storedPin = data.pin || '1234';
+      if (storedPin !== pin.trim()) {
+        setErrorMsg('Incorrect PIN / Password. Please check and try again / غلط پن یا پاس ورڈ درج کیا گیا ہے۔');
+        return;
+      }
+
+      const verifiedCustomer: VerifiedCustomer = {
+        name: data.name || 'Wholesale Client',
+        phone: data.phone,
+        email: data.email || undefined,
+        city: data.city || 'Karachi',
+        address: data.address || '',
+        verifiedAt: new Date().toISOString(),
+      };
+
+      setSuccessMsg(`Welcome back, ${verifiedCustomer.name}! Opening wholesale portal...`);
+
+      localStorage.setItem('pak_confectionary_customer', JSON.stringify(verifiedCustomer));
+
+      setTimeout(() => {
+        onVerified(verifiedCustomer);
+      }, 400);
     } catch (err: any) {
-      console.error('Supabase OTP Error:', err);
-      setErrorMsg(err.message || 'Failed to send OTP code to Gmail / جی میل پر کوڈ بھیجنے میں مسئلہ پیش آیا۔');
+      console.error('Login error:', err);
+      setErrorMsg(err.message || 'Login failed. Please check your network connection.');
     } finally {
       setLoading(false);
     }
   }
 
-  // Step 2: Verify OTP via Supabase Auth
-  async function handleVerifyOtp(e: React.FormEvent) {
+  // Handle Sign-Up (New Customer Registration)
+  async function handleSignUp(e: React.FormEvent) {
     e.preventDefault();
-    if (!otpCode.trim() || otpCode.trim().length < 6) {
-      setErrorMsg('Please enter the 6-digit OTP code / برائے مہربانی 6 ہندسوں کا کوڈ درج کریں۔');
+
+    if (!name.trim() || !rawPhone.trim() || !address.trim() || !city.trim() || !pin.trim()) {
+      setErrorMsg('Please fill in all fields including a 4-digit PIN / برائے مہربانی تمام تفصیلات اور 4 ہندسوں کا پن کوڈ درج فرمائیں۔');
+      return;
+    }
+
+    if (!isValidPakistaniPhone(rawPhone)) {
+      setErrorMsg('Please enter a valid Pakistani mobile number (e.g. 03001234567) / درست پاکستانی موبائل نمبر درج فرمائیں۔');
+      return;
+    }
+
+    if (pin.trim().length < 4) {
+      setErrorMsg('PIN / Password must be at least 4 digits / پن کوڈ کم از کم 4 ہندسوں پر مشتمل ہونا چاہیے۔');
       return;
     }
 
     setLoading(true);
     setErrorMsg(null);
+    setSuccessMsg(null);
+
+    const formattedPhone = formatPakistaniPhone(rawPhone);
 
     try {
-      const { data, error } = await supabase.auth.verifyOtp({
-        email: email.trim().toLowerCase(),
-        token: otpCode.trim(),
-        type: 'email',
-      });
+      // Check if phone number is already registered
+      const { data: existingUser } = await supabase
+        .from('customers')
+        .select('phone')
+        .eq('phone', formattedPhone)
+        .maybeSingle();
 
-      if (error) throw error;
+      if (existingUser) {
+        setErrorMsg('This phone number is already registered! Please switch to Log In / یہ فون نمبر پہلے سے رجسٹرڈ ہے، برائے مہربانی لاگ ان فرمائیں۔');
+        setMode('login');
+        setLoading(false);
+        return;
+      }
+
+      // Save new customer into Supabase 'customers' table
+      const { error: dbError } = await supabase
+        .from('customers')
+        .insert({
+          name: name.trim(),
+          phone: formattedPhone,
+          pin: pin.trim(),
+          city: city.trim(),
+          address: address.trim(),
+          is_verified: true,
+          verification_method: 'pin_auth',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        });
+
+      if (dbError) {
+        throw dbError;
+      }
 
       const verifiedCustomer: VerifiedCustomer = {
         name: name.trim(),
-        phone: formatPakistaniPhone(rawPhone),
-        email: email.trim().toLowerCase(),
+        phone: formattedPhone,
         city: city.trim(),
         address: address.trim(),
         verifiedAt: new Date().toISOString(),
       };
 
+      setSuccessMsg('Account created successfully! Opening wholesale store... / اکاؤنٹ بن گیا، اسٹور کھولا جا رہا ہے۔');
+
       localStorage.setItem('pak_confectionary_customer', JSON.stringify(verifiedCustomer));
-      onVerified(verifiedCustomer);
+
+      setTimeout(() => {
+        onVerified(verifiedCustomer);
+      }, 400);
     } catch (err: any) {
-      console.error('OTP Verification Error:', err);
-      setErrorMsg('Invalid or expired OTP code. Please recheck your Gmail / غلط یا ایکسپائرڈ کوڈ ہے، جی میل چیک کر کے دوبارہ درج کریں۔');
+      console.error('Sign up error:', err);
+      setErrorMsg(err.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -168,7 +240,7 @@ export default function CustomerAuthModal({ isOpen, onVerified, onClose }: Props
     <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5">
       <div className="bg-white rounded-3xl max-w-lg w-full max-h-[92vh] flex flex-col shadow-[0_25px_70px_rgba(0,0,0,0.15)] border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-200 relative">
         {/* Top Direct Demo Banner */}
-        <div className="bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 px-5 py-2.5 flex items-center justify-between text-xs border-b border-amber-200/70 flex-shrink-0">
+        <div className="bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 px-5 py-2 flex items-center justify-between text-xs border-b border-amber-200/70 flex-shrink-0">
           <span className="text-amber-950 font-black flex items-center gap-1.5 text-[11px]">
             <Sparkles className="w-3.5 h-3.5 text-amber-600 animate-pulse" />
             <span>Fast Entry / تیز ترین رسائی</span>
@@ -176,15 +248,15 @@ export default function CustomerAuthModal({ isOpen, onVerified, onClose }: Props
           <button
             type="button"
             onClick={handleDirectBypass}
-            className="bg-amber-400 hover:bg-amber-500 text-slate-950 font-black px-3.5 py-1 rounded-xl transition active:scale-95 text-[11px] flex items-center gap-1.5 shadow-2xs"
+            className="bg-amber-400 hover:bg-amber-500 text-slate-950 font-black px-3 py-1 rounded-xl transition active:scale-95 text-[11px] flex items-center gap-1.5 shadow-2xs"
           >
             <Zap className="w-3.5 h-3.5 fill-current" />
-            <span>Direct Access / بغیر کوڈ کے داخل ہوں</span>
+            <span>Direct Access / بغیر پاس ورڈ داخل ہوں</span>
           </button>
         </div>
 
         {/* Brand Banner Header */}
-        <div className="bg-gradient-to-br from-amber-50/80 via-white to-amber-100/50 p-6 text-center border-b border-amber-100/80 relative overflow-hidden flex-shrink-0">
+        <div className="bg-gradient-to-br from-amber-50/80 via-white to-amber-100/50 p-4 sm:p-5 text-center border-b border-amber-100/80 relative overflow-hidden flex-shrink-0">
           {onClose && (
             <button
               onClick={onClose}
@@ -194,22 +266,56 @@ export default function CustomerAuthModal({ isOpen, onVerified, onClose }: Props
             </button>
           )}
 
-          <div className="w-12 h-12 bg-gradient-to-tr from-amber-400 to-amber-500 text-slate-950 rounded-2xl flex items-center justify-center font-black text-2xl mx-auto shadow-sm shadow-amber-400/30 mb-2">
+          <div className="w-10 h-10 bg-gradient-to-tr from-amber-400 to-amber-500 text-slate-950 rounded-2xl flex items-center justify-center font-black text-xl mx-auto shadow-sm shadow-amber-400/30 mb-1.5">
             🍬
           </div>
           <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
             Pakistan Confectionary
           </h2>
-          <p className="text-xs sm:text-sm font-bold text-amber-900 font-urdu mt-0.5">
-            تھوک و پرچون کسٹمر پورٹل میں خوش آمدید
+          <p className="text-xs font-bold text-amber-900 font-urdu mt-0.5">
+            تھوک و پرچون کسٹمر پورٹل
           </p>
-          <p className="text-[11px] text-slate-500 font-urdu mt-1 max-w-sm mx-auto leading-relaxed">
-            کارٹن اور ریٹیل نرخ دیکھنے اور کیش آن ڈیلیوری آرڈر کے لیے جی میل او ٹی پی تصدیق مکمل فرمائیں
-          </p>
+
+          {/* Mode Switcher Tabs */}
+          <div className="flex bg-slate-100 p-1 rounded-2xl max-w-xs mx-auto mt-3 border border-slate-200/80">
+            <button
+              type="button"
+              onClick={() => {
+                setMode('login');
+                setErrorMsg(null);
+                setSuccessMsg(null);
+              }}
+              className={`flex-1 py-1.5 text-xs font-black rounded-xl transition flex items-center justify-center gap-1.5 ${
+                mode === 'login'
+                  ? 'bg-white text-slate-900 shadow-xs'
+                  : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <LogIn className="w-3.5 h-3.5 text-amber-600" />
+              <span>Log In / لاگ ان</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setMode('signup');
+                setErrorMsg(null);
+                setSuccessMsg(null);
+              }}
+              className={`flex-1 py-1.5 text-xs font-black rounded-xl transition flex items-center justify-center gap-1.5 ${
+                mode === 'signup'
+                  ? 'bg-white text-slate-900 shadow-xs'
+                  : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <UserPlus className="w-3.5 h-3.5 text-amber-600" />
+              <span>Sign Up / نیا رجسٹریشن</span>
+            </button>
+          </div>
         </div>
 
         {/* Form Body */}
-        <div className="p-5 sm:p-7 flex-1 overflow-y-auto space-y-4">
+        <div className="p-5 sm:p-6 flex-1 overflow-y-auto space-y-4">
           {errorMsg && (
             <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2.5 shadow-2xs">
               <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-rose-600" />
@@ -224,12 +330,118 @@ export default function CustomerAuthModal({ isOpen, onVerified, onClose }: Props
             </div>
           )}
 
-          {step === 'info' ? (
-            /* STEP 1: Enter Customer Information */
-            <form onSubmit={handleSendOtp} className="space-y-4">
+          {mode === 'login' ? (
+            /* ============================================================ */
+            /* TAB 1: LOG IN (PHONE + 4-DIGIT PIN/PASSWORD)                 */
+            /* ============================================================ */
+            <form onSubmit={handleLogin} className="space-y-4">
               <div>
                 <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1 flex items-center justify-between">
-                  <span>Full Name</span>
+                  <span>Registered Mobile / WhatsApp</span>
+                  <span className="font-urdu font-normal text-slate-400 text-xs">رجسٹرڈ موبائل نمبر</span>
+                </label>
+                <div className="relative">
+                  <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="tel"
+                    required
+                    autoFocus
+                    value={rawPhone}
+                    onChange={(e) => setRawPhone(e.target.value)}
+                    placeholder="03001234567"
+                    className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-mono focus:ring-2 focus:ring-amber-500 focus:bg-white text-slate-900 font-bold transition"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1 flex items-center justify-between">
+                  <span>Security PIN or Password</span>
+                  <span className="font-urdu font-normal text-slate-400 text-xs">4 ہندسوں کا سیکیورٹی پن یا پاس ورڈ</span>
+                </label>
+                <div className="relative">
+                  <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type={showPin ? 'text' : 'password'}
+                    required
+                    value={pin}
+                    onChange={(e) => setPin(e.target.value)}
+                    placeholder="e.g. 1234"
+                    className="w-full pl-10 pr-11 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-mono tracking-wider focus:ring-2 focus:ring-amber-500 focus:bg-white text-slate-900 font-bold transition"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPin(!showPin)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700"
+                  >
+                    {showPin ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="pt-2 space-y-3">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-3.5 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-500 hover:from-amber-500 hover:to-amber-600 disabled:opacity-50 text-slate-950 font-black text-sm rounded-2xl shadow-sm transition flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin text-slate-900" />
+                      <span className="font-urdu">لاگ ان ہو رہا ہے...</span>
+                    </>
+                  ) : (
+                    <>
+                      <LogIn className="w-4 h-4 text-slate-900" />
+                      <span>Log In / لاگ ان کریں اور اسٹور کھولیں</span>
+                      <ArrowRight className="w-4 h-4 text-slate-900" />
+                    </>
+                  )}
+                </button>
+
+                <div className="text-center pt-2 border-t border-slate-100">
+                  <p className="text-xs text-slate-500">
+                    New Wholesale Client?{' '}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMode('signup');
+                        setErrorMsg(null);
+                      }}
+                      className="text-amber-700 font-black hover:underline font-urdu"
+                    >
+                      نیا اکاؤنٹ رجسٹر کریں (Sign Up)
+                    </button>
+                  </p>
+                </div>
+              </div>
+            </form>
+          ) : (
+            /* ============================================================ */
+            /* TAB 2: SIGN UP (NEW REGISTRATION)                            */
+            /* ============================================================ */
+            <form onSubmit={handleSignUp} className="space-y-3.5">
+              <div>
+                <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1 flex items-center justify-between">
+                  <span>Mobile Phone / WhatsApp *</span>
+                  <span className="font-urdu font-normal text-slate-400 text-xs">موبائل نمبر (کال و واٹس ایپ)</span>
+                </label>
+                <div className="relative">
+                  <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="tel"
+                    required
+                    value={rawPhone}
+                    onChange={(e) => setRawPhone(e.target.value)}
+                    placeholder="03001234567"
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm font-mono focus:ring-2 focus:ring-amber-500 focus:bg-white text-slate-900 font-bold transition"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1 flex items-center justify-between">
+                  <span>Full Name / Shop Name *</span>
                   <span className="font-urdu font-normal text-slate-400 text-xs">پورا نام یا دکان کا نام</span>
                 </label>
                 <div className="relative">
@@ -240,66 +452,58 @@ export default function CustomerAuthModal({ isOpen, onVerified, onClose }: Props
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="e.g. Kamran Wholesale Traders"
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs sm:text-sm focus:ring-2 focus:ring-amber-500 focus:bg-white text-slate-900 font-semibold transition"
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm focus:ring-2 focus:ring-amber-500 focus:bg-white text-slate-900 font-semibold transition"
                   />
                 </div>
               </div>
 
               <div>
                 <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1 flex items-center justify-between">
-                  <span>Gmail / Email Address (for OTP)</span>
-                  <span className="font-urdu font-normal text-slate-400 text-xs">جی میل ای میل (او ٹی پی کے لیے)</span>
+                  <span>Set 4-Digit Security PIN or Password *</span>
+                  <span className="font-urdu font-normal text-slate-400 text-xs">4 ہندسوں کا سیکیورٹی پن مقرر کریں</span>
                 </label>
                 <div className="relative">
-                  <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
-                    type="email"
+                    type={showPin ? 'text' : 'password'}
                     required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="yourname@gmail.com"
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs sm:text-sm focus:ring-2 focus:ring-amber-500 focus:bg-white text-slate-900 font-semibold transition"
+                    value={pin}
+                    onChange={(e) => setPin(e.target.value)}
+                    placeholder="e.g. 1234"
+                    className="w-full pl-10 pr-11 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm font-mono tracking-wider focus:ring-2 focus:ring-amber-500 focus:bg-white text-slate-900 font-bold transition"
                   />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1 flex items-center justify-between">
-                  <span>Mobile Phone / WhatsApp</span>
-                  <span className="font-urdu font-normal text-slate-400 text-xs">موبائل فون نمبر (کال و واٹس ایپ)</span>
-                </label>
-                <div className="relative">
-                  <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="tel"
-                    required
-                    value={rawPhone}
-                    onChange={(e) => setRawPhone(e.target.value)}
-                    placeholder="03001234567"
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs sm:text-sm font-mono focus:ring-2 focus:ring-amber-500 focus:bg-white text-slate-900 font-bold transition"
-                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPin(!showPin)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700"
+                  >
+                    {showPin ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
                 </div>
               </div>
 
               <div className="space-y-2">
                 <div>
                   <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1 flex items-center justify-between">
-                    <span>Delivery Address</span>
-                    <span className="font-urdu font-normal text-slate-400 text-xs">مکمل دکان یا گھر کا پتہ</span>
+                    <span>Delivery Address *</span>
+                    <span className="font-urdu font-normal text-slate-400 text-xs">مکمل پتہ (دکان یا گودام)</span>
                   </label>
-                  <input
-                    type="text"
-                    required
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    placeholder="Shop / House #, Market Name, Area"
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs sm:text-sm focus:ring-2 focus:ring-amber-500 focus:bg-white text-slate-900 font-medium transition"
-                  />
+                  <div className="relative">
+                    <MapPin className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      required
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      placeholder="Shop #, Market Name, Area / مارکیٹ، دکان نمبر"
+                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm focus:ring-2 focus:ring-amber-500 focus:bg-white text-slate-900 font-medium transition"
+                    />
+                  </div>
                 </div>
 
                 <div>
                   <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1 flex items-center justify-between">
-                    <span>City</span>
+                    <span>City *</span>
                     <span className="font-urdu font-normal text-slate-400 text-xs">شہر</span>
                   </label>
                   <input
@@ -308,7 +512,7 @@ export default function CustomerAuthModal({ isOpen, onVerified, onClose }: Props
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
                     placeholder="Karachi, Lahore..."
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs sm:text-sm focus:ring-2 focus:ring-amber-500 focus:bg-white text-slate-900 font-semibold transition"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm focus:ring-2 focus:ring-amber-500 focus:bg-white text-slate-900 font-semibold transition"
                   />
                 </div>
 
@@ -333,117 +537,40 @@ export default function CustomerAuthModal({ isOpen, onVerified, onClose }: Props
               </div>
 
               {/* Action Buttons */}
-              <div className="space-y-2.5 pt-3">
+              <div className="space-y-2.5 pt-2">
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black text-xs sm:text-sm rounded-2xl shadow-sm transition flex items-center justify-center gap-2 active:scale-95"
+                  className="w-full py-3.5 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-500 hover:from-amber-500 hover:to-amber-600 disabled:opacity-50 text-slate-950 font-black text-xs sm:text-sm rounded-2xl shadow-sm transition flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
                 >
                   {loading ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin text-slate-900" />
-                      <span className="font-urdu">او ٹی پی بھیجا جا رہا ہے...</span>
+                      <span className="font-urdu">اکاؤنٹ بنایا جا رہا ہے...</span>
                     </>
                   ) : (
                     <>
-                      <Mail className="w-4 h-4" />
-                      <span>Send OTP to Gmail / جی میل پر کوڈ بھیجیں</span>
+                      <UserPlus className="w-4 h-4 text-slate-900" />
+                      <span>Create Account & Enter / اکاؤنٹ بنائیں اور داخل ہوں</span>
+                      <ArrowRight className="w-4 h-4 text-slate-900" />
                     </>
                   )}
                 </button>
 
-                <button
-                  type="button"
-                  onClick={handleDirectBypass}
-                  className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-2xl transition flex items-center justify-center gap-1.5 active:scale-95"
-                >
-                  <Zap className="w-3.5 h-3.5 text-amber-500" />
-                  <span>Direct Access without Code / بغیر کوڈ کے آرڈر کریں</span>
-                </button>
-              </div>
-            </form>
-          ) : (
-            /* STEP 2: Enter OTP Code from Gmail */
-            <form onSubmit={handleVerifyOtp} className="space-y-4 text-center">
-              <div>
-                <div className="w-10 h-10 bg-amber-100 text-amber-700 rounded-full flex items-center justify-center mx-auto mb-2">
-                  <Mail className="w-5 h-5" />
-                </div>
-                <h3 className="font-black text-slate-900 text-base">
-                  Check Your Gmail Inbox
-                </h3>
-                <p className="text-xs font-urdu text-amber-800 font-bold mt-0.5">
-                  اپنے جی میل پر آیا 6 ہندسوں کا کوڈ درج فرمائیں
-                </p>
-                <p className="text-xs text-slate-500 mt-1">
-                  OTP sent to: <strong className="font-mono text-slate-800">{email}</strong>
-                </p>
-              </div>
-
-              <div>
-                <input
-                  type="text"
-                  maxLength={6}
-                  required
-                  autoFocus
-                  value={otpCode}
-                  onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
-                  placeholder="• • • • • •"
-                  className="w-full py-3.5 text-center tracking-[0.5em] text-2xl font-black bg-slate-50 border-2 border-slate-200 rounded-2xl focus:border-amber-500 focus:bg-white focus:outline-none text-slate-900 font-mono transition"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <button
-                  type="submit"
-                  disabled={loading || otpCode.length < 6}
-                  className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-black text-xs sm:text-sm rounded-2xl transition flex items-center justify-center gap-1.5 shadow-sm active:scale-95"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin text-white" />
-                      <span>تصدیق ہو رہی ہے...</span>
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle2 className="w-4 h-4" />
-                      <span>Verify & Open Store / تصدیق مکمل کریں</span>
-                    </>
-                  )}
-                </button>
-
-                <div className="flex items-center justify-between text-xs pt-1 px-1">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setStep('info');
-                      setOtpCode('');
-                      setErrorMsg(null);
-                    }}
-                    className="text-slate-500 hover:text-slate-800 underline font-medium"
-                  >
-                    ← Change Email / واپس جائیں
-                  </button>
-
-                  <button
-                    type="button"
-                    disabled={resendCooldown > 0 || loading}
-                    onClick={() => handleSendOtp()}
-                    className="text-amber-700 hover:text-amber-800 font-bold disabled:text-slate-400 flex items-center gap-1"
-                  >
-                    <RotateCcw className="w-3 h-3" />
-                    <span>{resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend Code / دوبارہ بھیجیں'}</span>
-                  </button>
-                </div>
-
-                <div className="pt-2 border-t border-slate-100">
-                  <button
-                    type="button"
-                    onClick={handleDirectBypass}
-                    className="text-xs font-bold text-slate-500 hover:text-slate-900 underline font-urdu"
-                  >
-                    براہ راست اسٹور کھولیں (Bypass & Continue)
-                  </button>
+                <div className="text-center pt-2 border-t border-slate-100">
+                  <p className="text-xs text-slate-500">
+                    Already have an account?{' '}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMode('login');
+                        setErrorMsg(null);
+                      }}
+                      className="text-amber-700 font-black hover:underline font-urdu"
+                    >
+                      یہاں لاگ ان کریں (Log In)
+                    </button>
+                  </p>
                 </div>
               </div>
             </form>

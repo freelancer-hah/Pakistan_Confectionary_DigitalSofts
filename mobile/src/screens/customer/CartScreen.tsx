@@ -117,7 +117,7 @@ export default function CartScreen({ navigation }: CartScreenProps) {
     const text = encodeURIComponent(
       `السلام علیکم! میں نے پاکستان کنفیکشنری ایپ سے آرڈر بک کیا ہے۔\nآرڈر نمبر: ${orderNum}\nکل رقم: Rs. ${cartTotal.toLocaleString()}\nنام: ${customer?.name}\nشہر: ${customer?.city}\nبرائے مہربانی تصدیق فرما دیں۔`
     );
-    Linking.openURL(`https://wa.me/923000000000?text=${text}`).catch(() => {
+    Linking.openURL(`https://wa.me/923192800479?text=${text}`).catch(() => {
       Alert.alert('Notice', 'WhatsApp could not be opened.');
     });
   }

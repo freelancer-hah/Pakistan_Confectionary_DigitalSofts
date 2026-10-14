@@ -92,3 +92,27 @@ drop policy if exists "product_images public update" on storage.objects;
 create policy "product_images public update"
 on storage.objects for update
 using (bucket_id = 'product_images');
+
+-- ==============================================================================
+-- 5. CUSTOMERS TABLE (Registered Wholesale Clients)
+-- ==============================================================================
+create table if not exists public.customers (
+  id uuid default gen_random_uuid() primary key,
+  name text not null,
+  phone text unique not null,
+  pin text not null default '1234',
+  email text,
+  address text not null,
+  city text not null default 'Karachi',
+  is_verified boolean default true,
+  verification_method text default 'pin_auth',
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+-- In case table already exists:
+alter table public.customers add column if not exists pin text default '1234';
+
+alter table public.customers enable row level security;
+drop policy if exists "Customers all access" on public.customers;
+create policy "Customers all access" on public.customers for all using (true) with check (true);

@@ -22,14 +22,14 @@ export default function CustomerProfileScreen({ onLogout }: CustomerProfileScree
   const [modalVisible, setModalVisible] = useState(false);
 
   function handleHelplineCall() {
-    Linking.openURL('tel:03001234567').catch(() => {
+    Linking.openURL('tel:+923192800479').catch(() => {
       Alert.alert('Notice', 'Unable to initiate phone call.');
     });
   }
 
   function handleHelplineWhatsApp() {
     const text = encodeURIComponent('السلام علیکم! مجھے پاکستان کنفیکشنری کے پروڈکٹس اور ریٹس کے متعلق رہنمائی درکار ہے۔');
-    Linking.openURL(`https://wa.me/923000000000?text=${text}`).catch(() => {
+    Linking.openURL(`https://wa.me/923192800479?text=${text}`).catch(() => {
       Alert.alert('Notice', 'Unable to open WhatsApp.');
     });
   }
@@ -176,7 +176,7 @@ export default function CustomerProfileScreen({ onLogout }: CustomerProfileScree
           <Ionicons name="call" size={20} color={colors.info} />
           <View style={{ flex: 1 }}>
             <Text style={styles.supportBtnTitle}>Direct Call Support</Text>
-            <Text style={styles.supportBtnSub}>براہ راست کال کریں (0300-1234567)</Text>
+            <Text style={styles.supportBtnSub}>براہ راست کال کریں (+92 319 2800479)</Text>
           </View>
           <Ionicons name="chevron-forward" size={16} color={colors.slate400} />
         </TouchableOpacity>

@@ -83,7 +83,7 @@ export default function TrackingScreen() {
     const text = encodeURIComponent(
       `السلام علیکم! مجھے آرڈر ${order ? order.order_number : ''} کے متعلق معلومات درکار ہیں۔`
     );
-    Linking.openURL(`https://wa.me/923000000000?text=${text}`).catch(() => {
+    Linking.openURL(`https://wa.me/923192800479?text=${text}`).catch(() => {
       Alert.alert('Notice', 'WhatsApp could not be opened.');
     });
   }
