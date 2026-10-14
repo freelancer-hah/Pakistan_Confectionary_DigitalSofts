@@ -24,7 +24,7 @@ const POPULAR_CITIES = ['Karachi', 'Lahore', 'Faisalabad', 'Rawalpindi', 'Multan
 
 export default function AuthScreen({ onLoginSuccess }: AuthScreenProps) {
   const { setCustomer } = useCart();
-  const [tab, setTab] = useState<'login' | 'register' | 'admin'>('login');
+  const [tab, setTab] = useState<'login' | 'register'>('login');
 
   // Customer Login Fields
   const [loginEmail, setLoginEmail] = useState('');
@@ -39,11 +39,6 @@ export default function AuthScreen({ onLoginSuccess }: AuthScreenProps) {
   const [showRegPassword, setShowRegPassword] = useState(false);
   const [regCity, setRegCity] = useState('Karachi');
   const [regAddress, setRegAddress] = useState('');
-
-  // Admin Login Fields
-  const [adminEmail, setAdminEmail] = useState('');
-  const [adminPassword, setAdminPassword] = useState('');
-  const [showAdminPassword, setShowAdminPassword] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -69,6 +64,12 @@ export default function AuthScreen({ onLoginSuccess }: AuthScreenProps) {
       if (data.user) {
         // Load metadata
         const meta = data.user.user_metadata || {};
+        const isUserAdmin = meta.role === 'admin' || data.user.email?.toLowerCase().includes('admin');
+        if (isUserAdmin) {
+          onLoginSuccess('admin');
+          return;
+        }
+
         const profile: CustomerProfile = {
           name: meta.name || data.user.email?.split('@')[0] || 'Customer',
           phone: meta.phone || '03001234567',
@@ -142,33 +143,6 @@ export default function AuthScreen({ onLoginSuccess }: AuthScreenProps) {
     }
   }
 
-  // 3. Admin Login
-  async function handleAdminLogin() {
-    if (!adminEmail.trim() || !adminPassword.trim()) {
-      setErrorMsg('Please enter Admin Email and Password / ایڈمن ای میل اور پاس ورڈ درج کریں');
-      return;
-    }
-
-    setLoading(true);
-    setErrorMsg(null);
-
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: adminEmail.trim().toLowerCase(),
-        password: adminPassword.trim(),
-      });
-
-      if (error) throw error;
-
-      onLoginSuccess('admin');
-    } catch (err: any) {
-      console.error('Admin login error:', err);
-      setErrorMsg(err.message || 'Admin credentials incorrect / ایڈمن معلومات درست نہیں');
-    } finally {
-      setLoading(false);
-    }
-  }
-
   return (
     <KeyboardAvoidingView
       style={styles.keyboardContainer}
@@ -196,7 +170,7 @@ export default function AuthScreen({ onLoginSuccess }: AuthScreenProps) {
             }}
           >
             <Text style={[styles.tabBtnText, tab === 'login' && styles.tabBtnTextActive]}>
-              Customer Login
+              Customer Login / لاگ ان
             </Text>
           </TouchableOpacity>
 
@@ -208,19 +182,7 @@ export default function AuthScreen({ onLoginSuccess }: AuthScreenProps) {
             }}
           >
             <Text style={[styles.tabBtnText, tab === 'register' && styles.tabBtnTextActive]}>
-              New Account
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.tabBtn, tab === 'admin' && styles.tabBtnActiveAdmin]}
-            onPress={() => {
-              setTab('admin');
-              setErrorMsg(null);
-            }}
-          >
-            <Text style={[styles.tabBtnText, tab === 'admin' && styles.tabBtnTextActiveAdmin]}>
-              Admin Portal
+              New Account / نیا اکاؤنٹ
             </Text>
           </TouchableOpacity>
         </View>
@@ -445,82 +407,6 @@ export default function AuthScreen({ onLoginSuccess }: AuthScreenProps) {
             >
               <Text style={styles.switchModeText}>
                 Already have an account? <Text style={styles.switchModeBold}>Log In Here / لاگ ان کریں</Text>
-              </Text>
-            </TouchableOpacity>
-          </View>
-        )}
-
-        {/* =============================================================== */}
-        {/* FORM 3: ADMIN LOGIN */}
-        {/* =============================================================== */}
-        {tab === 'admin' && (
-          <View style={styles.card}>
-            <Text style={styles.formTitle}>Admin Console / ایڈمن پورٹل</Text>
-            <Text style={styles.formSubtitle}>
-              Authorized store managers and business owners only
-            </Text>
-
-            <Text style={styles.label}>Admin Email</Text>
-            <View style={styles.inputWrapper}>
-              <Ionicons name="shield-outline" size={18} color={colors.slate400} style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="admin@wholesale.com"
-                placeholderTextColor={colors.slate400}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                value={adminEmail}
-                onChangeText={setAdminEmail}
-              />
-            </View>
-
-            <Text style={styles.label}>Admin Password</Text>
-            <View style={styles.inputWrapper}>
-              <Ionicons name="lock-closed-outline" size={18} color={colors.slate400} style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="Enter admin password"
-                placeholderTextColor={colors.slate400}
-                secureTextEntry={!showAdminPassword}
-                value={adminPassword}
-                onChangeText={setAdminPassword}
-              />
-              <TouchableOpacity
-                onPress={() => setShowAdminPassword(!showAdminPassword)}
-                style={styles.eyeBtn}
-              >
-                <Ionicons
-                  name={showAdminPassword ? 'eye-off-outline' : 'eye-outline'}
-                  size={18}
-                  color={colors.slate500}
-                />
-              </TouchableOpacity>
-            </View>
-
-            <TouchableOpacity
-              style={[styles.adminSubmitBtn, loading && styles.submitBtnDisabled]}
-              onPress={handleAdminLogin}
-              disabled={loading}
-            >
-              {loading ? (
-                <ActivityIndicator size="small" color={colors.white} />
-              ) : (
-                <>
-                  <Ionicons name="shield-checkmark" size={18} color={colors.white} />
-                  <Text style={styles.submitBtnText}>Enter Admin Panel / داخل ہوں</Text>
-                </>
-              )}
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.switchModeLink}
-              onPress={() => {
-                setTab('login');
-                setErrorMsg(null);
-              }}
-            >
-              <Text style={styles.switchModeText}>
-                Looking for Customer Store? <Text style={styles.switchModeBold}>Switch to Customer</Text>
               </Text>
             </TouchableOpacity>
           </View>
