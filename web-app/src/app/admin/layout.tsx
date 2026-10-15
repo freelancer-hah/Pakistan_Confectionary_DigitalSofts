@@ -228,44 +228,44 @@ export default function AdminLayout({
       {/* ========================================================================= */}
       <div className="flex-1 flex flex-col min-w-0 min-h-screen">
         {/* Sticky Header with Soft Blur */}
-        <header className="h-20 bg-white/85 backdrop-blur-md border-b border-slate-200/80 px-5 md:px-8 flex items-center justify-between sticky top-0 z-20 shadow-2xs">
+        <header className="h-16 sm:h-20 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-3 sm:px-6 md:px-8 flex items-center justify-between sticky top-0 z-20 shadow-2xs">
           {/* Mobile Menu Trigger & Title */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition"
+              className="md:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition flex-shrink-0"
               aria-label="Toggle Navigation Menu"
             >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {mobileMenuOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
             </button>
 
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-amber-500"></span>
-                <h1 className="text-sm md:text-base font-black text-slate-900 tracking-tight">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0"></span>
+                <h1 className="text-xs sm:text-base font-black text-slate-900 tracking-tight truncate">
                   Store Management Console
                 </h1>
               </div>
-              <span className="text-xs text-slate-500 font-urdu block -mt-0.5 leading-snug">
+              <span className="text-[10px] sm:text-xs text-slate-500 font-urdu truncate block leading-snug">
                 پاکستان کنفیکشنری • ایڈمن کنٹرول روم
               </span>
             </div>
           </div>
 
           {/* Quick Header Actions */}
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-1.5 sm:gap-2.5 flex-shrink-0 ml-2">
             <Link
               href="/admin/products/new"
-              className="inline-flex items-center gap-1.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 text-xs font-black px-4 py-2 rounded-xl transition shadow-sm active:scale-95"
+              className="inline-flex items-center gap-1.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 text-xs font-black px-2.5 sm:px-4 py-2 rounded-xl transition shadow-sm active:scale-95 flex-shrink-0"
             >
               <PlusCircle className="w-3.5 h-3.5 stroke-[2.5]" />
-              <span>Add Product</span>
-              <span className="font-urdu text-[11px] font-normal hidden sm:inline">| نیا پروڈکٹ</span>
+              <span>Add<span className="hidden sm:inline"> Product</span></span>
+              <span className="font-urdu text-[11px] font-normal hidden md:inline">| نیا پروڈکٹ</span>
             </Link>
 
             <button
               onClick={handleLogout}
-              className="inline-flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-600 text-xs font-bold rounded-xl transition border border-slate-200/80 active:scale-95"
+              className="inline-flex items-center gap-1.5 p-2 sm:px-3 sm:py-2 bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-600 text-xs font-bold rounded-xl transition border border-slate-200/80 active:scale-95 flex-shrink-0"
               title="Sign Out of Admin"
             >
               <LogOut className="w-3.5 h-3.5" />

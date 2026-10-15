@@ -361,24 +361,24 @@ export default function StorefrontPage() {
 
       <div>
         {/* TOP UTILITY BAR */}
-        <div className="bg-gradient-to-r from-amber-50 via-orange-50/40 to-amber-50 border-b border-amber-200/60 text-slate-700 py-1.5 px-4 text-xs">
-          <div className="max-w-6xl mx-auto flex items-center justify-between gap-3">
+        <div className="bg-gradient-to-r from-amber-50 via-orange-50/40 to-amber-50 border-b border-amber-200/60 text-slate-700 py-1.5 px-3 sm:px-4 text-xs">
+          <div className="max-w-6xl mx-auto flex items-center justify-between gap-2">
             {/* Left: WhatsApp Helpline */}
             <a
               href="https://wa.me/923192800479?text=Assalam-o-Alaikum%20Pakistan%20Confectionary%20Wholesale%20Inquiry"
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1.5 text-emerald-800 hover:text-emerald-950 font-bold bg-white px-3 py-1 rounded-full border border-emerald-200/90 shadow-2xs hover:bg-emerald-50/80 transition text-[11px]"
+              className="inline-flex items-center gap-1.5 text-emerald-800 hover:text-emerald-950 font-bold bg-white px-2.5 sm:px-3 py-1 rounded-full border border-emerald-200/90 shadow-2xs hover:bg-emerald-50/80 transition text-[10px] sm:text-[11px] flex-shrink-0"
             >
               <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Helpline: +92 319 2800479</span>
-              <span className="font-urdu text-[11px] text-emerald-700 font-semibold border-l border-emerald-200 pl-1.5 ml-0.5">
+              <span><span className="hidden sm:inline">Helpline: </span>+92 319 2800479</span>
+              <span className="font-urdu text-[10px] sm:text-[11px] text-emerald-700 font-semibold border-l border-emerald-200 pl-1.5 ml-0.5 hidden sm:inline">
                 واٹس ایپ
               </span>
             </a>
 
             {/* Right: Order Tracking & Customer Profile */}
-            <div className="flex items-center gap-2.5 text-[11px]">
+            <div className="flex items-center gap-1.5 sm:gap-2.5 text-[10px] sm:text-[11px]">
               {/* Track Order Button */}
               <button
                 onClick={() => {
@@ -387,25 +387,21 @@ export default function StorefrontPage() {
                     searchOrder(recentOrders[0]);
                   }
                 }}
-                className="flex items-center gap-1.5 text-amber-950 hover:text-amber-900 font-black bg-amber-400 hover:bg-amber-500 px-3 py-1 rounded-full shadow-2xs transition active:scale-95 cursor-pointer"
+                className="flex items-center gap-1 text-amber-950 hover:text-amber-900 font-black bg-amber-400 hover:bg-amber-500 px-2.5 sm:px-3 py-1 rounded-full shadow-2xs transition active:scale-95 cursor-pointer flex-shrink-0"
               >
                 <PackageCheck className="w-3.5 h-3.5 text-amber-950" />
-                <span>Track Order</span>
-                <span className="font-urdu text-[11px] font-semibold border-l border-amber-500/80 pl-1.5 ml-0.5">آرڈر ٹریک کریں</span>
+                <span>Track<span className="hidden sm:inline"> Order</span></span>
+                <span className="font-urdu text-[10px] font-semibold border-l border-amber-500/80 pl-1 ml-0.5 hidden md:inline">آرڈر ٹریک کریں</span>
               </button>
 
               {customer ? (
-                <div className="flex items-center gap-2 bg-white border border-slate-200 px-3 py-1 rounded-full shadow-2xs">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                  <span className="font-black text-slate-800">{customer.name}</span>
-                  <span className="text-slate-400 font-mono text-[10px]">({customer.phone})</span>
-                  <span className="font-urdu text-[11px] text-emerald-700 font-bold border-l border-slate-200 pl-1.5 ml-0.5">
-                    تصدیق شدہ
-                  </span>
+                <div className="flex items-center gap-1.5 bg-white border border-slate-200 px-2.5 sm:px-3 py-1 rounded-full shadow-2xs flex-shrink-0">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span className="font-black text-slate-800 max-w-[80px] sm:max-w-none truncate">{customer.name}</span>
                   <button
                     onClick={handleLogout}
                     title="Switch / Log out"
-                    className="text-slate-400 hover:text-rose-500 transition ml-1 p-0.5 rounded-full hover:bg-slate-100 cursor-pointer"
+                    className="text-slate-400 hover:text-rose-500 transition ml-0.5 p-0.5 rounded-full hover:bg-slate-100 cursor-pointer"
                   >
                     <LogOut className="w-3 h-3" />
                   </button>
@@ -413,11 +409,11 @@ export default function StorefrontPage() {
               ) : (
                 <button
                   onClick={() => setAuthModalOpen(true)}
-                  className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-800 font-bold px-3 py-1 rounded-full border border-slate-200 shadow-2xs transition active:scale-95 cursor-pointer"
+                  className="flex items-center gap-1 bg-white hover:bg-slate-50 text-slate-800 font-bold px-2.5 sm:px-3 py-1 rounded-full border border-slate-200 shadow-2xs transition active:scale-95 cursor-pointer flex-shrink-0"
                 >
                   <UserCheck className="w-3.5 h-3.5 text-amber-600" />
-                  <span>Log In / Sign Up</span>
-                  <span className="font-urdu text-[11px] text-slate-500 font-normal border-l border-slate-200 pl-1.5 ml-0.5">لاگ ان</span>
+                  <span>Log In</span>
+                  <span className="font-urdu text-[10px] text-slate-500 font-normal border-l border-slate-200 pl-1 ml-0.5 hidden sm:inline">لاگ ان</span>
                 </button>
               )}
             </div>
@@ -426,17 +422,17 @@ export default function StorefrontPage() {
 
         {/* MAIN HEADER */}
         <header className="bg-white/85 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-30 shadow-2xs">
-          <div className="max-w-6xl mx-auto px-4 h-20 flex items-center justify-between gap-4">
+          <div className="max-w-6xl mx-auto px-3 sm:px-4 h-16 sm:h-20 flex items-center justify-between gap-2 sm:gap-4">
             {/* Logo & Title */}
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="h-12 w-12 rounded-2xl bg-gradient-to-tr from-amber-400 via-amber-500 to-amber-600 text-slate-950 flex items-center justify-center font-black text-2xl shadow-sm shadow-amber-400/25 group-hover:scale-105 transition-transform duration-200">
+            <Link href="/" className="flex items-center gap-2 sm:gap-3 group min-w-0 flex-1 mr-2">
+              <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-amber-400 via-amber-500 to-amber-600 text-slate-950 flex items-center justify-center font-black text-xl sm:text-2xl shadow-sm shadow-amber-400/25 group-hover:scale-105 transition-transform duration-200 flex-shrink-0">
                 🍬
               </div>
-              <div>
-                <span className="font-black text-slate-900 text-xl tracking-tight block group-hover:text-amber-600 transition">
+              <div className="min-w-0 flex-1">
+                <span className="font-black text-slate-900 text-sm sm:text-xl tracking-tight block group-hover:text-amber-600 transition truncate">
                   PAKISTAN <span className="text-amber-500">CONFECTIONARY</span>
                 </span>
-                <span className="text-xs text-slate-500 font-urdu block -mt-0.5 leading-snug">
+                <span className="text-[10px] sm:text-xs text-slate-500 font-urdu block -mt-0.5 leading-snug truncate">
                   پاکستان کنفیکشنری • معیاری تھوک و پرچون سپلائی پورٹل
                 </span>
               </div>
@@ -463,7 +459,7 @@ export default function StorefrontPage() {
             </div>
 
             {/* Header Actions: Track Order & Cart */}
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
               <button
                 onClick={() => {
                   setTrackingModalOpen(true);
@@ -471,7 +467,7 @@ export default function StorefrontPage() {
                     searchOrder(recentOrders[0]);
                   }
                 }}
-                className="hidden sm:flex items-center gap-2 px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-2xl text-xs font-bold transition active:scale-95"
+                className="hidden md:flex items-center gap-2 px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-2xl text-xs font-bold transition active:scale-95"
               >
                 <PackageCheck className="w-4 h-4 text-amber-600" />
                 <span>Track Order / ٹریک کریں</span>
@@ -480,12 +476,12 @@ export default function StorefrontPage() {
               {/* Cart Trigger Button with Live Total */}
               <button
                 onClick={() => setCartOpen(true)}
-                className="relative flex items-center gap-2.5 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl text-xs font-bold transition shadow-sm active:scale-95"
+                className="relative flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 sm:py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl sm:rounded-2xl text-xs font-bold transition shadow-sm active:scale-95 flex-shrink-0"
               >
                 <ShoppingCart className="w-4 h-4 text-amber-400" />
-                <span>Cart / کارٹ</span>
+                <span>کارٹ</span>
                 {totalItemsCount > 0 ? (
-                  <span className="bg-amber-400 text-slate-950 font-black text-[11px] px-2 py-0.5 rounded-full shadow-xs animate-bounce">
+                  <span className="bg-amber-400 text-slate-950 font-black text-[11px] px-1.5 sm:px-2 py-0.5 rounded-full shadow-xs animate-bounce">
                     {totalItemsCount}
                   </span>
                 ) : (
