@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '../api/supabase';
 import { colors } from '../theme/colors';
 import { useCart, CustomerProfile } from '../context/CartContext';
@@ -29,10 +30,15 @@ const AdminTab = createBottomTabNavigator();
 const STORAGE_KEY_ROLE = '@wholesale_user_role';
 
 export default function AppNavigator() {
+  const insets = useSafeAreaInsets();
   const { totalItemsCount, setCustomer } = useCart();
   const [session, setSession] = useState<any>(null);
   const [userRole, setUserRole] = useState<'customer' | 'admin' | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const bottomInset = insets.bottom;
+  const tabHeight = 58 + Math.max(bottomInset, 8);
+  const tabPaddingBottom = Math.max(bottomInset, 8);
 
   useEffect(() => {
     // 1. Check existing session and role
@@ -181,8 +187,8 @@ export default function AppNavigator() {
               backgroundColor: colors.white,
               borderTopColor: colors.border,
               borderTopWidth: 1,
-              height: 60,
-              paddingBottom: 8,
+              height: tabHeight,
+              paddingBottom: tabPaddingBottom,
               paddingTop: 8,
             },
             tabBarActiveTintColor: colors.primaryDark,
@@ -281,8 +287,8 @@ export default function AppNavigator() {
             backgroundColor: colors.white,
             borderTopColor: colors.border,
             borderTopWidth: 1,
-            height: 60,
-            paddingBottom: 8,
+            height: tabHeight,
+            paddingBottom: tabPaddingBottom,
             paddingTop: 8,
           },
           tabBarActiveTintColor: colors.primaryDark,
