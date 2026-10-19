@@ -15,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../api/supabase';
 import { Product, ProductType } from '../../types/wholesale';
 import { colors } from '../../theme/colors';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useCart, MIN_ORDER_WHOLESALE, MIN_ORDER_RETAIL } from '../../context/CartContext';
 import CustomerAuthModal from './CustomerAuthModal';
 
@@ -23,6 +24,7 @@ interface ShopScreenProps {
 }
 
 export default function ShopScreen({ navigation }: ShopScreenProps) {
+  const insets = useSafeAreaInsets();
   const {
     cart,
     activeTab,
@@ -93,8 +95,8 @@ export default function ShopScreen({ navigation }: ShopScreenProps) {
 
   return (
     <View style={styles.container}>
-      {/* Top Header */}
-      <View style={styles.topHeader}>
+      {/* Top Header with Safe Area Inset */}
+      <View style={[styles.topHeader, { paddingTop: Math.max(insets.top, 20) + 8 }]}>
         <View style={styles.brandRow}>
           <View style={styles.logoBadge}>
             <Text style={{ fontSize: 22 }}>🍬</Text>
@@ -238,7 +240,7 @@ export default function ShopScreen({ navigation }: ShopScreenProps) {
           keyExtractor={(item) => item.id}
           contentContainerStyle={[
             styles.listContent,
-            totalItemsCount > 0 && { paddingBottom: 90 },
+            { paddingBottom: totalItemsCount > 0 ? 100 + insets.bottom : 24 + insets.bottom },
           ]}
           refreshControl={
             <RefreshControl
@@ -351,7 +353,10 @@ export default function ShopScreen({ navigation }: ShopScreenProps) {
       {/* Floating Bottom Cart Summary Bar */}
       {totalItemsCount > 0 && (
         <TouchableOpacity
-          style={styles.floatingCart}
+          style={[
+            styles.floatingCart,
+            { bottom: 12 + (insets.bottom > 0 ? 4 : 0) },
+          ]}
           onPress={() => navigation.navigate('Cart')}
           activeOpacity={0.9}
         >
@@ -391,8 +396,7 @@ const styles = StyleSheet.create({
   topHeader: {
     backgroundColor: colors.white,
     paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 10,
+    paddingBottom: 12,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',

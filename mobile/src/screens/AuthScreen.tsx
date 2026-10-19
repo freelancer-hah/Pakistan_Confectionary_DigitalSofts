@@ -14,6 +14,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../api/supabase';
 import { colors } from '../theme/colors';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useCart, CustomerProfile } from '../context/CartContext';
 
 interface AuthScreenProps {
@@ -23,6 +24,7 @@ interface AuthScreenProps {
 const POPULAR_CITIES = ['Karachi', 'Lahore', 'Faisalabad', 'Rawalpindi', 'Multan', 'Peshawar', 'Quetta', 'Gujranwala'];
 
 export default function AuthScreen({ onLoginSuccess }: AuthScreenProps) {
+  const insets = useSafeAreaInsets();
   const { setCustomer } = useCart();
   const [tab, setTab] = useState<'login' | 'register'>('login');
 
@@ -148,7 +150,16 @@ export default function AuthScreen({ onLoginSuccess }: AuthScreenProps) {
       style={styles.keyboardContainer}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={[
+          styles.content,
+          {
+            paddingTop: Math.max(insets.top, 20) + 16,
+            paddingBottom: Math.max(insets.bottom, 16) + 24,
+          },
+        ]}
+      >
         {/* Brand Banner */}
         <View style={styles.brandHeader}>
           <View style={styles.logoBadge}>

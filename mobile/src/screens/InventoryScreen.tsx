@@ -16,12 +16,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../api/supabase';
 import { Product, ProductType } from '../types/wholesale';
 import { colors } from '../theme/colors';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface InventoryScreenProps {
   navigation: any;
 }
 
 export default function InventoryScreen({ navigation }: InventoryScreenProps) {
+  const insets = useSafeAreaInsets();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -169,8 +171,8 @@ export default function InventoryScreen({ navigation }: InventoryScreenProps) {
 
   return (
     <View style={styles.container}>
-      {/* Header Bar */}
-      <View style={styles.header}>
+      {/* Header Bar with Safe Area Top */}
+      <View style={[styles.header, { paddingTop: Math.max(insets.top, 20) + 8 }]}>
         <View>
           <Text style={styles.headerTitle}>Inventory & Stock</Text>
           <Text style={styles.headerSubtitle}>
@@ -260,7 +262,7 @@ export default function InventoryScreen({ navigation }: InventoryScreenProps) {
         <FlatList
           data={filteredProducts}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={[styles.listContent, { paddingBottom: 24 + insets.bottom }]}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
@@ -479,7 +481,6 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 20,
-    paddingTop: 16,
     paddingBottom: 12,
     backgroundColor: colors.white,
     borderBottomWidth: 1,
